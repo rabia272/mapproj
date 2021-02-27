@@ -1,13 +1,16 @@
 package org.iiui.mapprac;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -40,7 +43,6 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.Arrays;
 import java.util.List;
-
 
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -204,6 +206,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * Response contains a list of placeLikelihood objects.
      * Takes the most likely places and extracts the place details for access in other methods.
      */
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void getCurrentPlaceLikelihoods() {
         // Use fields to define the data types to return.
         List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS,
@@ -213,6 +216,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         // are the best match for the device's current location.
         @SuppressWarnings("MissingPermission") final FindCurrentPlaceRequest request =
                 FindCurrentPlaceRequest.builder(placeFields).build();
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    Activity#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
+        }
         Task<FindCurrentPlaceResponse> placeResponse = mPlacesClient.findCurrentPlace(request);
         placeResponse.addOnCompleteListener(this,
                 new OnCompleteListener<FindCurrentPlaceResponse>() {
